@@ -102,12 +102,3 @@ dist
 
 # TernJS port file
 .tern-port
-
-# TelarCore Microservices
-micros/actions
-micros/admin
-micros/auth
-micros/notifications
-micros/profile
-micros/setting
-micros/web
