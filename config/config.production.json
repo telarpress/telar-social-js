@@ -1,0 +1,72 @@
+{
+  "micros": {
+    "circle": {
+      "environment": {
+        "base_route": "/circles",
+        "write_debug": "true"
+      }
+    },
+    "comments": {
+      "environment": {
+        "base_route": "/comments",
+        "write_debug": "true"
+      }
+    },
+    "media": {
+      "environment": {
+        "base_route": "/gallery",
+        "write_debug": "true"
+      }
+    },
+    "post": {
+      "environment": {
+        "base_route": "/posts",
+        "write_debug": "true"
+      }
+    },
+    "user_rels": {
+      "environment": {
+        "base_route": "/user-rels",
+        "write_debug": "true"
+      }
+    },
+    "vang": {
+      "environment": {
+        "base_route": "/vang",
+        "write_debug": "true"
+      }
+    },
+    "votes": {
+      "environment": {
+        "base_route": "/votes",
+        "write_debug": "true"
+      }
+    }
+  },
+  "environment": {
+    "app_name": "Telar Social",
+    "base_route_domain": "",
+    "db_type": "mongo",
+    "header_cookie_name": "he",
+    "org_avatar": "https://avatars3.githubusercontent.com/u/43268620",
+    "org_name": "Telar",
+    "payload_cookie_name": "pa",
+    "phone_source_number": "0123456",
+    "read_timeout": "10s",
+    "recaptcha_site_key": "6LcNJ6QgAAAAALmLiLxIuIM08EoIoYAPUv-lWbvG",
+    "redis_address": "redis-19712.c12.us-east-1-4.ec2.cloud.redislabs.com:19712",
+    "ref_email": "no-reply@telar.dev",
+    "signature_cookie_name": "si",
+    "smtp_email_host": "smtp.mailtrap.io",
+    "smtp_email_port": "2525",
+    "write_timeout": "10s",
+    "cookie_root_domain": ".telar.dev",
+    "hmac_header_name": "X-Cloud-Signature",
+    "gateway": "https://social.faas.telar.dev",
+    "internal_gateway": "http://gateway.openfaas:8080/function",
+    "origin": "https://social.faas.telar.dev, https://social.telar.dev, https://auth.telar.dev",
+    "websocket_server_url": "https://telarpress-websocket.herokuapp.com",
+    "debug": true,
+    "secret_source": "env"
+  }
+}
