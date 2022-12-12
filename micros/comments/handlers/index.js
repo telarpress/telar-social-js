@@ -149,7 +149,7 @@ exports.createCommentHandle = async function (req, res) {
     }
     const URL = "/posts/" + postResult.Result.urlKey;
     let notificationModel = {
-      ownerUserId: currentUser.UserId,
+      ownerUserId: currentUser.userId,
       ownerDisplayName: currentUser.displayName,
       ownerAvatar: currentUser.avatar,
       title: currentUser.displayName,
@@ -278,7 +278,7 @@ exports.updateCommentHandle = async function (req, res) {
 
     let updatedComment = {
       objectId: model.objectId,
-      ownerUserId: currentUser.UserId,
+      ownerUserId: currentUser.userId,
       postId: model.postId,
       score: model.score,
       text: model.text,
@@ -322,7 +322,7 @@ exports.updateCommentProfileHandle = async function (req, res) {
     }
 
     await commentService.updateCommentProfile(
-      currentUser.UserId,
+      currentUser.userId,
       currentUser.displayName,
       currentUser.avatar
     );
@@ -383,7 +383,7 @@ exports.deleteCommentHandle = async function (req, res) {
         );
     }
 
-    await commentService.deleteCommentByOwner(currentUser.UserId, commentId);
+    await commentService.deleteCommentByOwner(currentUser.userId, commentId);
 
     // Create user headers for http request
     let userHeaders = {};
