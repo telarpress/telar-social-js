@@ -56,21 +56,17 @@ exports.unfollowUser = async function (leftId, rightId) {
 
 // DeleteCircle delete the circle from user-rel
 exports.deleteCircle = async function (circleId) {
+  console.log(circleId);
   let filter = {};
   let pullOperator = {};
-  let inOperator = [];
+  let inOperator = {};
   inOperator["$in"] = [circleId];
-  let circleIds = [];
+  let circleIds = {};
   circleIds["circleIds"] = inOperator;
   pullOperator["$pull"] = circleIds;
-  try {
-    // return await UserRel.updateMany(
-    //   {},
-    //   { $pullAll: { circleIds: circleId } },
-    //   { multi: true }
-    // );
 
-    return await UserRel.updateOne(filter, pullOperator);
+  try {
+    return await UserRel.deleteMany(filter, pullOperator);
   } catch (error) {
     return error;
   }
@@ -107,13 +103,14 @@ exports.getFollowers = async function (userId) {
 
 // FindRelsIncludeProfile get all user relations by filter including user profile entity
 async function findRelsIncludeProfile(filter, limit, skip, sort) {
+  let pipeline = [];
+
   let matchOperator = {};
   matchOperator["$match"] = filter;
 
   let sortOperator = {};
   sortOperator["$sort"] = sort;
 
-  let pipeline = [];
   pipeline.push(matchOperator, sortOperator);
 
   if (skip > 0) {
@@ -129,7 +126,7 @@ async function findRelsIncludeProfile(filter, limit, skip, sort) {
   }
 
   // Add left user pipeline
-  lookupLeftUser = {};
+  let lookupLeftUser = {};
   lookupLeftUser["$lookup"] = {
     localField: "leftId",
     from: "userProfile",
@@ -142,7 +139,7 @@ async function findRelsIncludeProfile(filter, limit, skip, sort) {
   pipeline.push(lookupLeftUser, unwindLeftUser);
 
   // Add right user pipeline
-  lookupRightUser = {};
+  let lookupRightUser = {};
   lookupRightUser["$lookup"] = {
     localField: "rightId",
     from: "userProfile",
@@ -154,7 +151,8 @@ async function findRelsIncludeProfile(filter, limit, skip, sort) {
   unwindRightUser["$unwind"] = "$rightUser";
   pipeline.push(lookupRightUser, unwindRightUser);
 
-  console.log("pipeline " + pipeline);
+  console.log(".: pipeline :.");
+  console.log(pipeline);
 
   let projectOperator = {};
   let project = {};
@@ -195,10 +193,11 @@ async function findRelsIncludeProfile(filter, limit, skip, sort) {
 
   const result = await UserRel.aggregate(pipeline);
 
-  var postList = [];
+  let postList = [];
   result.forEach((post) => {
     postList.push(post);
   });
+
   return postList;
 }
 

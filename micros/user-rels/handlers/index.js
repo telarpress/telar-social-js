@@ -412,7 +412,7 @@ exports.getFollowersHandle = async function (req, res) {
         );
     }
 
-    const followers = userRelService.getFollowers(currentUser.userId);
+    const followers = await userRelService.getFollowers(currentUser.userId);
 
     return res.status(HttpStatusCode.OK).send({ followers });
   } catch (error) {
@@ -444,7 +444,7 @@ exports.getFollowingHandle = async function (req, res) {
         );
     }
 
-    const followers = userRelService.getFollowing(currentUser.userId);
+    const followers = await userRelService.getFollowing(currentUser.userId);
 
     return res.status(HttpStatusCode.OK).send({ followers });
   } catch (error) {
