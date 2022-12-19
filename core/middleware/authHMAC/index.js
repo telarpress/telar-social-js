@@ -46,7 +46,7 @@ exports.authHMAC = (req, res, next) => {
     }
 
     res.locals.user = {
-      userID: userUUID,
+      userId: userUUID,
       username: req.header["email"],
       socialName: req.header["socialName"],
       displayName: req.header["displayName"],
