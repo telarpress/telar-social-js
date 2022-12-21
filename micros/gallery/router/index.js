@@ -29,7 +29,7 @@ galleryRouter.post(
 );
 
 galleryRouter.put(
-  "/gallery/unfollow/:userId",
+  "/gallery/",
   hmacCookieHandlers(true),
   handlers.UpdateMediaHandle
 );

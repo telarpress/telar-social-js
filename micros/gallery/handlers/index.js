@@ -1,4 +1,4 @@
-const galleryService = require("../services/gallery.service.js");
+const mediaService = require("../services/gallery.service.js");
 const utils = require("../../../core/utils/error-handler");
 const { HttpStatusCode } = require("../../../core/utils/HttpStatusCode");
 const log = require("../../../core/utils/errorLogger");
@@ -56,6 +56,7 @@ exports.createMediaHandle = async function (req, res) {
     permission: model.permission,
     deleted: false,
   };
+
   try {
     await mediaService.saveMedia(newMedia);
     return res.status(HttpStatusCode.OK).send({ objectId: newMedia.objectId });
@@ -102,7 +103,7 @@ exports.createMediaListHandle = async function (req, res) {
 
   let mediaList = [];
 
-  media.forEach((media) => {
+  model.forEach((media) => {
     let newMedia = {
       objectId: media.objectId,
       deletedDate: 0,
@@ -123,6 +124,7 @@ exports.createMediaListHandle = async function (req, res) {
       permission: media.permission,
       deleted: false,
     };
+
     mediaList.push(newMedia);
   });
 
@@ -190,7 +192,6 @@ exports.UpdateMediaHandle = async function (req, res) {
     permission: model.permission,
     deleted: false,
   };
-
   try {
     await mediaService.updateMediaById(updatedMedia);
     return res.status(HttpStatusCode.OK).send();
@@ -237,7 +238,7 @@ exports.deleteMediaHandle = async function (req, res) {
         );
     }
 
-    await galleryService.deleteMediaByOwner(currentUser.userId, mediaId);
+    await mediaService.deleteMediaByOwner(currentUser.userId, mediaId);
 
     return res.status(HttpStatusCode.OK).send();
   } catch (error) {
@@ -283,7 +284,7 @@ exports.deleteDirectoryHandle = async function (req, res) {
         );
     }
 
-    await galleryService.deleteMediaByDirectory(currentUser.userId, dir);
+    await mediaService.deleteMediaByDirectory(currentUser.userId, dir);
 
     return res.status(HttpStatusCode.OK).send();
   } catch (error) {
@@ -299,8 +300,75 @@ exports.deleteDirectoryHandle = async function (req, res) {
   }
 };
 
-// QueryAlbumHandle handle query on media
+// GetMediaHandle handle get a media
 exports.getMediaHandle = async function (req, res) {
+  // params from /medias/id/:mediaId
+  const mediaId = req.params.mediaId;
+  if (!mediaId) {
+    log.Error("Media Id is required!");
+    return res
+      .status(HttpStatusCode.InternalServerError)
+      .send(
+        new utils.ErrorHandler(
+          "gallery.mediaIdRequired",
+          "Media Id is required!"
+        ).json()
+      );
+  }
+
+  try {
+    const currentUser = res.locals.user;
+    if (!currentUser || currentUser == null) {
+      log.Error("[GetMediaHandle] Can not get current user");
+      return res
+        .status(HttpStatusCode.Unauthorized)
+        .send(
+          new utils.ErrorHandler(
+            "gallery.invalidCurrentUser",
+            "Can not get current user"
+          ).json()
+        );
+    }
+
+    const foundMedia = await mediaService.findById(mediaId);
+
+    let mediaModel = {
+      objectId: foundMedia.objectId,
+      deletedDate: foundMedia.deletedDate,
+      createdDate: foundMedia.createdDate,
+      thumbnail: foundMedia.thumbnail,
+      url: foundMedia.url,
+      fullPath: foundMedia.fullPath,
+      caption: foundMedia.caption,
+      fileName: foundMedia.fileName,
+      directory: foundMedia.directory,
+      ownerUserId: foundMedia.ownerUserId,
+      lastUpdated: foundMedia.lastUpdated,
+      albumId: foundMedia.albumId,
+      width: foundMedia.width,
+      height: foundMedia.height,
+      meta: foundMedia.meta,
+      accessUserList: foundMedia.accessUserList,
+      permission: foundMedia.permission,
+      deleted: foundMedia.deleted,
+    };
+
+    return res.status(HttpStatusCode.OK).send(mediaModel);
+  } catch (error) {
+    log.Error(`[GetMediaHandle] - query media Error ${error}`);
+    return res
+      .status(HttpStatusCode.InternalServerError)
+      .send(
+        new utils.ErrorHandler(
+          "gallery.internal/queryMedia",
+          "Error happened while query media!"
+        ).json()
+      );
+  }
+};
+
+// QueryAlbumHandle handle query on media
+exports.queryAlbumHandle = async function (req, res) {
   try {
     const currentUser = res.locals.user;
     if (!currentUser || currentUser == null) {
@@ -328,7 +396,7 @@ exports.getMediaHandle = async function (req, res) {
         );
     }
 
-    mediaList = await galleryService.queryAlbum(
+    mediaList = await mediaService.queryAlbum(
       currentUser.userId,
       query.album,
       query.page,
@@ -380,7 +448,7 @@ exports.getMediaByDirectoryHandle = async function (req, res) {
         );
     }
 
-    const foundMediaList = await galleryService.findByDirectory(
+    const foundMediaList = await mediaService.findByDirectory(
       currentUser.userId,
       dirName,
       0,

@@ -1,6 +1,6 @@
 const { appConfig } = require("../config");
 const jwt = require("jsonwebtoken");
-const Gallery = require("../models/gallery");
+const Gallery = require("../models/media.js");
 const { v4: uuidv4 } = require("uuid");
 // const GateKeeper = require("../utils/hmac");
 // const MUUID = require("uuid-mongodb");
@@ -9,52 +9,35 @@ const numberOfItems = 10;
 
 // SaveMedia save the media
 exports.saveMedia = async function (media) {
-  if (!media.objectId) {
-    try {
-      media.objectId = uuidv4();
-      if (!media.created_date) {
-        media.created_date = Math.floor(Date.now() / 1000);
-      }
-      return await Gallery(media).save();
-    } catch (uuidErr) {
-      return uuidErr;
+  try {
+    if (!media.objectId) media.objectId = uuidv4();
+    if (media.created_date == 0) {
+      media.created_date = Math.floor(Date.now() / 1000);
     }
+    return await Gallery(media).save();
+  } catch (uuidErr) {
+    return uuidErr;
   }
 };
 
 // SaveManyMedia save the media
-exports.saveManyMedia = async function (medias) {
-  // https://github.com/golang/go/wiki/InterfaceSlice
-
-  // var interfaceSlice []interface{} = make([]interface{}, len(medias))
-  // for i, d := range medias {
-  // 	if d.ObjectId == uuid.Nil {
-  // 		var uuidErr error
-  // 		d.ObjectId, uuidErr = uuid.NewV4()
-  // 		if uuidErr != nil {
-  // 			return uuidErr
-  // 		}
-  // 	}
-
-  // 	if d.CreatedDate == 0 {
-  // 		d.CreatedDate = utils.UTCNowUnix()
-  // 	}
-  // 	interfaceSlice[i] = d
-  // }
-  // result := <-s.MediaRepo.SaveMany(mediaCollectionName, interfaceSlice)
-
-  // return result.Error
-
-  if (!medias.objectId) {
-    try {
-      medias.objectId = uuidv4();
-      if (!medias.created_date) {
-        medias.created_date = Math.floor(Date.now() / 1000);
+exports.saveManyMedia = async function (media) {
+  try {
+    const interfaceSlices = {};
+    for (let i = 0; i < media.length; i++) {
+      const d = media[i];
+      if (!d.objectId) {
+        d.objectId = uuidv4(); // from uuid package
       }
-      return await Gallery(medias).save();
-    } catch (uuidErr) {
-      return uuidErr;
+
+      if (d.createdDate === 0) {
+        d.createdDate = new Date().getTime();
+      }
+      interfaceSlices[i] = d;
     }
+    Gallery(interfaceSlices).save();
+  } catch (uuidErr) {
+    return uuidErr;
   }
 };
 
@@ -76,9 +59,9 @@ exports.updateMediaById = async function (data) {
 };
 
 // DeleteMedia delete media by ownerUserId and mediaId
-exports.deleteMediaByOwner = async function (ownerUserId, directory) {
+exports.deleteMediaByOwner = async function (ownerUserId, mediaId) {
   let filter = {
-    directory: directory,
+    objectId: mediaId,
     ownerUserId: ownerUserId,
   };
   try {
@@ -89,9 +72,9 @@ exports.deleteMediaByOwner = async function (ownerUserId, directory) {
 };
 
 // DeleteMediaByDirectory delete media by ownerUserId and mediaId
-exports.deleteMediaByDirectory = async function (ownerUserId, mediaId) {
+exports.deleteMediaByDirectory = async function (ownerUserId, directory) {
   let filter = {
-    objectId: mediaId,
+    directory: directory,
     ownerUserId: ownerUserId,
   };
   try {
@@ -129,9 +112,9 @@ exports.queryAlbum = async function (
 async function findMediaList(filter, limit, skip, sortMap) {
   try {
     const result = await Gallery.find(filter, limit, skip, sort)
-      .sort(sortMap)
       .limit(limit)
-      .skip(skip);
+      .skip(skip)
+      .sort(sortMap);
 
     let mediaList = [];
     result.forEach((media) => {
@@ -152,8 +135,21 @@ exports.findByDirectory = async function (ownerUserId, directory, limit, skip) {
     ownerUserId: ownerUserId,
     directory: directory,
   };
+
   try {
     return await findMediaList(filter, limit, skip, sortMap);
+  } catch (error) {
+    return error;
+  }
+};
+
+// FindById find by media id
+exports.findById = async function (objectId) {
+  let filter = {
+    objectId: objectId,
+  };
+  try {
+    return await Gallery.findOne(filter);
   } catch (error) {
     return error;
   }

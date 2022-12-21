@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+const MediaSchema = mongoose.Schema;
 
-const MediaSchema =
-  ({
+const Media = new MediaSchema(
+  {
     objectId: { type: String },
     deletedDate: { type: Number },
     created_date: { type: Number },
@@ -18,7 +18,7 @@ const MediaSchema =
     width: { type: Number },
     height: { type: Number },
     meta: { type: String },
-    accessUserList: [{ type: String }],
+    accessUserList: { type: [String] },
     permission: {
       type: [String],
       enum: ["Public", "OnlyMe", "Circles", "Custom"],
@@ -26,6 +26,7 @@ const MediaSchema =
     },
     deleted: { type: Boolean },
   },
-  { collection: "media" });
+  { collection: "media" }
+);
 
-module.exports = mongoose.model("media", MediaSchema);
+module.exports = mongoose.model("media", Media);
