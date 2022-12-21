@@ -16,14 +16,14 @@ exports.saveMedia = async function (media) {
     }
     return await Gallery(media).save();
   } catch (uuidErr) {
-    return uuidErr;
+    throw uuidErr;
   }
 };
 
 // SaveManyMedia save the media
 exports.saveManyMedia = async function (media) {
   try {
-    const interfaceSlices = {};
+    const interfaceSlices = [];
     for (let i = 0; i < media.length; i++) {
       const d = media[i];
       if (!d.objectId) {
@@ -33,11 +33,12 @@ exports.saveManyMedia = async function (media) {
       if (d.createdDate === 0) {
         d.createdDate = new Date().getTime();
       }
-      interfaceSlices[i] = d;
+      interfaceSlices.push(d);
     }
-    Gallery(interfaceSlices).save();
+
+    await Gallery.insertMany(interfaceSlices);
   } catch (uuidErr) {
-    return uuidErr;
+    throw uuidErr;
   }
 };
 
@@ -54,7 +55,7 @@ exports.updateMediaById = async function (data) {
   try {
     return await Gallery.updateOne(filter, updateOperator);
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
@@ -67,7 +68,7 @@ exports.deleteMediaByOwner = async function (ownerUserId, mediaId) {
   try {
     return await Gallery.deleteMany(filter);
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
@@ -80,7 +81,7 @@ exports.deleteMediaByDirectory = async function (ownerUserId, directory) {
   try {
     return await Gallery.deleteMany(filter);
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
@@ -100,30 +101,27 @@ exports.queryAlbum = async function (
   if (albumId) {
     filter["albumId"] = albumId;
   }
-
   try {
-    return await findMediaList(filter, limit, skip, sortMap);
+    return findMediaList(filter, limit, skip, sortMap);
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
 // FindMediaList get all medias by filter
 async function findMediaList(filter, limit, skip, sortMap) {
   try {
-    const result = await Gallery.find(filter, limit, skip, sort)
+    const result = await Gallery.find(filter)
       .limit(limit)
       .skip(skip)
       .sort(sortMap);
-
     let mediaList = [];
     result.forEach((media) => {
       mediaList.push(media);
     });
-
     return mediaList;
   } catch (error) {
-    return error;
+    throw error;
   }
 }
 
@@ -139,7 +137,7 @@ exports.findByDirectory = async function (ownerUserId, directory, limit, skip) {
   try {
     return await findMediaList(filter, limit, skip, sortMap);
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
@@ -151,6 +149,6 @@ exports.findById = async function (objectId) {
   try {
     return await Gallery.findOne(filter);
   } catch (error) {
-    return error;
+    throw error;
   }
 };
