@@ -1,3 +1,4 @@
+//telar:api path=/medias
 const app = require("express")();
 const db = require("./database");
 const galleryRouter = require("./router");

@@ -210,7 +210,7 @@ exports.UpdateMediaHandle = async function (req, res) {
 
 // DeleteMediaHandle handle delete a media
 exports.deleteMediaHandle = async function (req, res) {
-  // params from /gallery/id/:mediaId
+  // params from /mediad/id/:mediaId
   const mediaId = req.params.mediaId;
   if (!mediaId) {
     log.Error("media Id is required!");
@@ -256,7 +256,7 @@ exports.deleteMediaHandle = async function (req, res) {
 
 // DeleteDirectoryHandle handle delete a media
 exports.deleteDirectoryHandle = async function (req, res) {
-  // params from /gallery/dir/:dir
+  // params from /mediad/dir/:dir
   const dir = req.params.dir;
   if (!dir) {
     log.Error("Directory name is required!");
@@ -302,7 +302,7 @@ exports.deleteDirectoryHandle = async function (req, res) {
 
 // GetMediaHandle handle get a media
 exports.getMediaHandle = async function (req, res) {
-  // params from /gallery/id/:mediaId
+  // params from /mediad/id/:mediaId
   const mediaId = req.params.mediaId;
   if (!mediaId) {
     log.Error("Media Id is required!");
@@ -420,7 +420,7 @@ exports.queryAlbumHandle = async function (req, res) {
 
 // GetMediaByDirectoryHandle handle get media list by directory
 exports.getMediaByDirectoryHandle = async function (req, res) {
-  // params from /gallery/dir/:dir
+  // params from /mediad/dir/:dir
   const dirName = req.params.dir;
   if (!dirName) {
     log.Error("Directory name is required!");
