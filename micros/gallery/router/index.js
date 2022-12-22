@@ -17,48 +17,48 @@ const handlers = require("../handlers");
 
 // Router
 galleryRouter.post(
-  "/gallery/",
+  "/media/",
   hmacCookieHandlers(true),
   handlers.createMediaHandle
 );
 
 galleryRouter.post(
-  "/gallery/list",
+  "/media/list",
   hmacCookieHandlers(true),
   handlers.createMediaListHandle
 );
 
 galleryRouter.put(
-  "/gallery/",
+  "/media/",
   hmacCookieHandlers(true),
   handlers.UpdateMediaHandle
 );
 
 galleryRouter.delete(
-  "/gallery/id/:mediaId",
+  "/media/id/:mediaId",
   hmacCookieHandlers(true),
   handlers.deleteMediaHandle
 );
 galleryRouter.delete(
-  "/gallery/dir/:dir",
+  "/media/dir/:dir",
   hmacCookieHandlers(true),
   handlers.deleteDirectoryHandle
 );
 
 galleryRouter.get(
-  "/gallery/",
+  "/media/",
   hmacCookieHandlers(true),
   handlers.queryAlbumHandle
 );
 
 galleryRouter.get(
-  "/gallery/id/:mediaId",
+  "/media/id/:mediaId",
   hmacCookieHandlers(true),
   handlers.getMediaHandle
 );
 
 galleryRouter.get(
-  "/gallery/dir/:dir",
+  "/media/dir/:dir",
   hmacCookieHandlers(true),
   handlers.getMediaByDirectoryHandle
 );
