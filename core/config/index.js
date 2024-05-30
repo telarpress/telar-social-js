@@ -4,6 +4,7 @@ const dev = require("../../config/config.development.json");
 const config = process.env.Node_ENV == "production" ? prod : dev;
 
 exports.appConfig = {
+  Origin: config.environment.origin,
   HMAC_NAME: config.environment.hmac_header_name,
   HMAC_KEY: process.env.HMAC_KEY,
   PUBKEY: decodeBase64(process.env.PUBKEY),
