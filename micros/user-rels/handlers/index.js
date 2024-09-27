@@ -45,9 +45,9 @@ exports.followHandle = async function (req, res) {
     };
     // Right User Meta
     let rightUserMeta = {
-      userId: model.rightUser.userId,
-      fullName: model.rightUser.fullName,
-      avatar: model.rightUser.avatar,
+      userId: model.right.userId,
+      fullName: model.right.fullName,
+      avatar: model.right.avatar,
     };
 
     let tags = { status: "follow" };
@@ -61,7 +61,7 @@ exports.followHandle = async function (req, res) {
       );
       // Create notification
 
-      await sendFollowNotification(model, getUserInfoReq(currentUser));
+      await sendFollowNotification(model, await getUserInfoReq(currentUser));
     } catch (error) {
       log.Error(`[FollowHandle] - Follow Handle error  ${error}`);
       return res
@@ -73,6 +73,7 @@ exports.followHandle = async function (req, res) {
           ).json()
         );
     }
+
     // Increase user follow count
     await increaseUserFollowCount(
       currentUser.userId,
@@ -114,6 +115,7 @@ async function getUserInfoReq(currentUser) {
 
 async function sendFollowNotification(model, userInfoInReq) {
   // Create user headers for http request
+
   const userHeaders = await getHeadersFromUserInfoReq(userInfoInReq);
 
   const URL = "/@/" + userInfoInReq.SocialName;
@@ -124,8 +126,8 @@ async function sendFollowNotification(model, userInfoInReq) {
     title: userInfoInReq.displayName,
     description: userInfoInReq.DisplayName + " is following you.",
     URL: URL,
-    notifyRecieverUserId: model.rightUser.userId,
-    targetId: model.rightUser.userId,
+    notifyRecieverUserId: model.right.userId,
+    targetId: model.right.userId,
     isSeen: false,
     type: "follow",
   };

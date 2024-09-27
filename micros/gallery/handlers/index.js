@@ -102,8 +102,7 @@ exports.createMediaListHandle = async function (req, res) {
   }
 
   let mediaList = [];
-
-  model.forEach((media) => {
+  model.list.forEach((media) => {
     let newMedia = {
       objectId: media.objectId,
       deletedDate: 0,
@@ -171,11 +170,8 @@ exports.UpdateMediaHandle = async function (req, res) {
         ).json()
       );
   }
-
   let updatedMedia = {
     objectId: model.objectId,
-    deletedDate: 0,
-    createdDate: Math.floor(Date.now() / 1000),
     thumbnail: model.thumbnail,
     url: model.URL,
     fullPath: model.fullPath,
@@ -183,14 +179,13 @@ exports.UpdateMediaHandle = async function (req, res) {
     fileName: model.fileName,
     directory: model.directory,
     ownerUserId: currentUser.userId,
-    lastUpdated: 0,
+    lastUpdated: Math.floor(Date.now() / 1000),
     albumId: model.albumId,
     width: model.width,
     height: model.height,
     meta: model.meta,
     accessUserList: model.accessUserList,
     permission: model.permission,
-    deleted: false,
   };
   try {
     await mediaService.updateMediaById(updatedMedia);
@@ -329,30 +324,34 @@ exports.getMediaHandle = async function (req, res) {
           ).json()
         );
     }
-
+    let mediaModel = "";
     const foundMedia = await mediaService.findById(mediaId);
-
-    let mediaModel = {
-      objectId: foundMedia.objectId,
-      deletedDate: foundMedia.deletedDate,
-      createdDate: foundMedia.createdDate,
-      thumbnail: foundMedia.thumbnail,
-      url: foundMedia.url,
-      fullPath: foundMedia.fullPath,
-      caption: foundMedia.caption,
-      fileName: foundMedia.fileName,
-      directory: foundMedia.directory,
-      ownerUserId: foundMedia.ownerUserId,
-      lastUpdated: foundMedia.lastUpdated,
-      albumId: foundMedia.albumId,
-      width: foundMedia.width,
-      height: foundMedia.height,
-      meta: foundMedia.meta,
-      accessUserList: foundMedia.accessUserList,
-      permission: foundMedia.permission,
-      deleted: foundMedia.deleted,
-    };
-
+    console.log(foundMedia);
+    console.log(foundMedia);
+    console.log(foundMedia);
+    console.log(foundMedia);
+    if (foundMedia) {
+      mediaModel = {
+        objectId: foundMedia.objectId,
+        deletedDate: foundMedia.deletedDate,
+        createdDate: foundMedia.createdDate,
+        thumbnail: foundMedia.thumbnail,
+        url: foundMedia.url,
+        fullPath: foundMedia.fullPath,
+        caption: foundMedia.caption,
+        fileName: foundMedia.fileName,
+        directory: foundMedia.directory,
+        ownerUserId: foundMedia.ownerUserId,
+        lastUpdated: foundMedia.lastUpdated,
+        albumId: foundMedia.albumId,
+        width: foundMedia.width,
+        height: foundMedia.height,
+        meta: foundMedia.meta,
+        accessUserList: foundMedia.accessUserList,
+        permission: foundMedia.permission,
+        deleted: foundMedia.deleted,
+      };
+    }
     return res.status(HttpStatusCode.OK).send(mediaModel);
   } catch (error) {
     log.Error(`[GetMediaHandle] - query media Error ${error}`);
@@ -396,7 +395,7 @@ exports.queryAlbumHandle = async function (req, res) {
         );
     }
 
-    mediaList = await mediaService.queryAlbum(
+    const mediaList = await mediaService.queryAlbum(
       currentUser.userId,
       query.album,
       query.page,
@@ -404,7 +403,7 @@ exports.queryAlbumHandle = async function (req, res) {
       "created_date"
     );
 
-    return res.status(HttpStatusCode.OK).send(mediaList).json();
+    return res.status(HttpStatusCode.OK).send(mediaList);
   } catch (error) {
     log.Error(`[QueryAlbumHandle.mediaService.QueryAlbum] ${error}`);
     return res

@@ -7,10 +7,9 @@ const GateKeeper = require("../utils/hmac");
 // const MUUID = require("uuid-mongodb");
 const hmac = require("../../../core/middleware/authHMAC/authHMAC");
 const numberOfItems = 10;
-
 // SavePost save the post
 exports.savePost = async function (post) {
-  if (!post.objectId) {
+  if (!post.objectId.includes("-").length < 10) {
     try {
       post.objectId = uuidv4();
     } catch (uuidErr) {
@@ -21,6 +20,7 @@ exports.savePost = async function (post) {
   if (post.created_date == 0) {
     post.created_date = Math.floor(Date.now() / 1000);
   }
+
   return await Post(post).save();
 };
 

@@ -56,7 +56,6 @@ exports.unfollowUser = async function (leftId, rightId) {
 
 // DeleteCircle delete the circle from user-rel
 exports.deleteCircle = async function (circleId) {
-  console.log(circleId);
   let filter = {};
   let pullOperator = {};
   let inOperator = {};

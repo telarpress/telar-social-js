@@ -199,13 +199,15 @@ exports.updateCircleHandle = async function (req, res) {
           ).json()
         );
     }
-    let updatedComment = {
+    let updatedCircle = {
       objectId: model.objectId,
       ownerUserId: currentUser.userId,
       name: model.name,
     };
-    await circleService.updateCircleById(updatedComment);
 
+    const updateCircleById = await circleService.updateCircleById(
+      updatedCircle
+    );
     return res.status(HttpStatusCode.OK).send();
   } catch (error) {
     log.Error(`[UpdateCircleHandle] - Update circle Error ${error}`);
@@ -213,7 +215,7 @@ exports.updateCircleHandle = async function (req, res) {
       .status(HttpStatusCode.InternalServerError)
       .send(
         new utils.ErrorHandler(
-          "circle.internal/updateComment",
+          "circle.internal/updateCircle",
           "Error happened while update circle!"
         ).json()
       );
@@ -284,7 +286,7 @@ exports.getMyCircleHandle = async function (req, res) {
   try {
     circleList = await circleService.findByOwnerUserId(currentUser.userId);
 
-    return res.status(HttpStatusCode.OK).send(circleList).json();
+    return res.status(HttpStatusCode.OK).send(circleList);
   } catch (error) {
     log.Error(`[getMyCircleHandle] ${error}`);
     return res
@@ -339,7 +341,7 @@ exports.getCircleHandle = async function (req, res) {
       isSystem: foundCircle.isSystem,
       created_date: foundCircle.created_date,
     };
-    return res.status(HttpStatusCode.OK).send(circleModel).json();
+    return res.status(HttpStatusCode.OK).send(circleModel);
   } catch (error) {
     log.Error(`[GetCircleHandle] - Get circle Error ${error}`);
     return res
