@@ -57,6 +57,7 @@ exports.createPostHandle = async function (req, res) {
         title: model.album.title,
       };
     }
+
     let newPost = {
       objectId: model.objectId,
       postTypeId: model.postTypeId,
@@ -67,7 +68,7 @@ exports.createPostHandle = async function (req, res) {
       body: model.body,
       ownerDisplayName: currentUser.displayName,
       ownerAvatar: currentUser.avatar,
-      urlKey: await generatPostURLKey(
+      urlKey: await generatePostURLKey(
         currentUser.socialName,
         model.body,
         model.objectId
@@ -106,16 +107,28 @@ exports.createPostHandle = async function (req, res) {
   }
 };
 
-// generatPostURLKey
-async function generatPostURLKey(socialName, body, postId) {
-  let content = body.replaceAll(" ", "-");
-  if (contentMaxLength <= content.length) {
-    content = content[contentMaxLength];
-  }
+// generatePostURLKey
+async function generatePostURLKey(socialName, body, postId) {
+  try {
+    let content = body.replaceAll(" ", "-");
+    if (contentMaxLength <= content.length) {
+      content = content[contentMaxLength];
+    }
 
-  return await `${socialName}_${content}-post-${
-    postId.split("-")[0]
-  }-${stringRand(5)}`.toLowerCase();
+    return `${socialName}_${content}-post-${postId.split("-")[0]}-${stringRand(
+      5
+    )}`.toLowerCase();
+  } catch (error) {
+    log.Error(`[InitPostIndexHandle] - Generate Post URLKey Error ${error}`);
+    return res
+      .status(HttpStatusCode.InternalServerError)
+      .send(
+        new utils.ErrorHandler(
+          "post.createPost",
+          "Error happened while Generate Post URLKey!"
+        ).json()
+      );
+  }
 }
 
 // InitPostIndexHandle handle create a new post
@@ -181,6 +194,7 @@ exports.updatePostHandle = async function (req, res) {
           ).json()
         );
     }
+
     let updatedAlbum = {
       count: model.album.count,
       cover: model.album.cover,
@@ -214,9 +228,9 @@ exports.updatePostHandle = async function (req, res) {
       version: model.version,
     };
 
-    await postService.UpdatePostById(updatedPost);
+    const UpdatePostById = await postService.UpdatePostById(updatedPost);
 
-    return res.status(HttpStatusCode.OK).send();
+    return res.status(HttpStatusCode.OK).send(UpdatePostById);
   } catch (error) {
     log.Error(`[UpdatePostHandle] - Save new post error  ${error}`);
     return res
@@ -395,6 +409,7 @@ exports.incrementCommentHandle = async function (req, res) {
           ).json()
         );
     }
+
     if (model.count > 0) {
       await postService.incrementCommentCount(model.postId);
     } else if (model.count < 0) {
@@ -459,7 +474,7 @@ exports.disableCommentHandle = async function (req, res) {
         );
     }
 
-    if (!model.status) {
+    if (!model.status === false && !model.status === true) {
       log.Error(`[disableCommentHandle] - Status is required!  ${error}`);
       return res
         .status(HttpStatusCode.InternalServerError)
@@ -642,7 +657,7 @@ exports.generatePostURLKeyHandle = async function (req, res) {
           );
       }
 
-      const urlKey = generatPostURLKey(
+      const urlKey = generatePostURLKey(
         postOwnerProfile.socialName,
         foundPost.body,
         foundPost.objectId.String()
@@ -664,7 +679,7 @@ exports.generatePostURLKeyHandle = async function (req, res) {
             ).json()
           );
       }
-      return res.status(HttpStatusCode.OK).send({ urlKey: urlKey }).json();
+      return res.status(HttpStatusCode.OK).send({ urlKey: urlKey });
     }
 
     return res
@@ -785,7 +800,7 @@ exports.queryPostHandle = async function (req, res) {
       query.page
     );
 
-    return res.status(HttpStatusCode.OK).send(postList).json();
+    return res.status(HttpStatusCode.OK).send(postList);
   } catch (error) {
     log.Error(`[queryPostHandle] - query post Error ${error}`);
     return res
@@ -908,7 +923,7 @@ exports.getPostHandle = async function (req, res) {
       };
     }
 
-    return res.status(HttpStatusCode.OK).send({ postModel }).json();
+    return res.status(HttpStatusCode.OK).send({ postModel });
   } catch (error) {
     log.Error(`[GetPostHandle] - Get Post Post Error  ${error}`);
     return res
@@ -1031,7 +1046,7 @@ exports.getPostByURLKeyHandle = async function (req, res) {
       };
     }
 
-    return res.status(HttpStatusCode.OK).send({ postModel }).json();
+    return res.status(HttpStatusCode.OK).send({ postModel });
   } catch (error) {
     log.Error(`[GetPostByURLKeyHandle] - Get Post By URL Key Error  ${error}`);
     return res

@@ -43,7 +43,7 @@ commentRouter.delete(
   handlers.deleteCommentByPostIdHandle
 );
 commentRouter.get(
-  "/comments/",
+  "/comments/query",
   hmacCookieHandlers(true),
   handlers.getCommentsByPostIdHandle
 );

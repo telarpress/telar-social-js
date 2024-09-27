@@ -37,7 +37,7 @@ postsRouter.put(
   hmacCookieHandlers(false),
   handlers.incrementScoreHandle
 );
-postsRouter.put(
+postsRouter.post(
   "/posts/comment/count",
   hmacCookieHandlers(false),
   handlers.incrementCommentHandle

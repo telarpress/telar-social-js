@@ -428,7 +428,7 @@ exports.getVotesByPostIdHandle = async function (req, res) {
       req.query.page
     );
 
-    return res.status(HttpStatusCode.OK).send(voteList).json();
+    return res.status(HttpStatusCode.OK).send(voteList);
   } catch (error) {
     log.Error(`[GetVotesByPostIdHandle.voteService.GetVoteByPostId] ${error}`);
     return res
@@ -485,7 +485,7 @@ exports.getVoteHandle = async function (req, res) {
       typeId: foundVote.typeId,
       created_date: foundVote.created_date,
     };
-    return res.status(HttpStatusCode.OK).send(voteModel).json();
+    return res.status(HttpStatusCode.OK).send(voteModel);
   } catch (error) {
     log.Error(`[GetVoteHandle] - Get vote Error ${error}`);
     return res

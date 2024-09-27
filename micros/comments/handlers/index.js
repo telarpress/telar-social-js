@@ -289,8 +289,9 @@ exports.updateCommentHandle = async function (req, res) {
       createdDate: model.createdDate,
       lastUpdated: model.lastUpdated,
     };
-    await commentService.updateCommentById(updatedComment);
-
+    const updateCommentById = await commentService.updateCommentById(
+      updatedComment
+    );
     return res.status(HttpStatusCode.OK).send();
   } catch (error) {
     log.Error(`[UpdateCommentHandle] - Update Comment Error  ${error}`);
@@ -320,7 +321,6 @@ exports.updateCommentProfileHandle = async function (req, res) {
           ).json()
         );
     }
-
     await commentService.updateCommentProfile(
       currentUser.userId,
       currentUser.displayName,
@@ -482,7 +482,7 @@ exports.getCommentsByPostIdHandle = async function (req, res) {
       req.query.page
     );
 
-    return res.status(HttpStatusCode.OK).send(commentList).json();
+    return res.status(HttpStatusCode.OK).send(commentList);
   } catch (error) {
     log.Error(
       `[GetCommentsByPostIdHandle.commentService.GetCommentByPostId] ${error}`
@@ -545,7 +545,7 @@ exports.getCommentHandle = async function (req, res) {
       createdDate: foundComment.createdDate,
       lastUpdated: foundComment.lastUpdated,
     };
-    return res.status(HttpStatusCode.OK).send(commentModel).json();
+    return res.status(HttpStatusCode.OK).send(commentModel);
   } catch (error) {
     log.Error(`[GetCommentHandle] - Get Comment Error  ${error}`);
     return res

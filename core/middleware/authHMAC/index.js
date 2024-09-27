@@ -1,68 +1,110 @@
 const { appConfig } = require("../../config");
-const utils = require("../../../core/utils/error-handler");
-const { HttpStatusCode } = require("../../../core/utils/HttpStatusCode");
-const log = require("../../../core/utils/errorLogger");
-const { validate } = require("./authHMAC");
-exports.authHMAC = (req, res, next) => {
+var CryptoJS = require("crypto-js");
+const { HttpStatusCode } = require("../../utils/HttpStatusCode");
+const utils = require("../../utils/error-handler");
+
+// Define the headers to be included in HMAC calculation
+const HMAC_HEADERS = [
+  "content-type",
+  "x-hmac-headers",
+  "uid",
+  "email",
+  "socialname",
+  "avatar",
+  "displayname",
+  "banner",
+  "tagline",
+  "role",
+];
+
+exports.authHMAC = function (req, res, next) {
   try {
-    // Check if the HMAC header contains content
-    const headerName = appConfig.HMAC_NAME;
-    const auth = req.get(headerName);
-    if (!auth || auth.length < 1) {
-      log.Error("Unauthorized! HMAC not presented!");
-      return res
-        .status(HttpStatusCode.Unauthorized)
-        .send(
-          new utils.ErrorHandler(
-            "authHMACMiddleware.HMACValidattionUnauthorized",
-            "Unauthorized! HMAC not presented!"
-          ).json()
-        );
+    const hmacHeader = req.get(appConfig.HMAC_NAME);
+    if (!hmacHeader) {
+      return res.status(401).json({ error: "HMAC header is missing" });
     }
-    const validattion = validate(req.body, appConfig.HMAC_KEY, auth);
-    if (!validattion) {
-      log.Error("Can not validated HMAC");
+
+    const hmacHeaders = req.get("x-hmac-headers");
+
+    if (!hmacHeaders) {
+      return res.status(401).json({ error: "Missing X-HMAC-Headers header" });
+    }
+
+    const headersToSign = hmacHeaders.split(",");
+
+    const [algorithm, signature] = hmacHeader.split("=");
+    if (algorithm !== "sha256" || !signature) {
+      return res.status(401).json({ error: "Invalid HMAC header format" });
+    }
+
+    // Reconstruct the string to sign
+    const headersString = headersToSign
+      .filter((key) => HMAC_HEADERS.includes(key.toLowerCase()))
+      .map((header) => {
+        const value = req.get(header);
+        return value ? `${header.toLocaleLowerCase()}:${value}` : null;
+      })
+      .filter(Boolean)
+      .join("\n");
+
+    let body = "";
+    if (req.method !== "GET" && req.body) {
+      body = JSON.stringify(req.body);
+    }
+    const stringToSign = `${headersString}\n${body}`;
+
+    // Calculate HMAC
+
+    const digest = CryptoJS.HmacSHA256(
+      stringToSign,
+      appConfig.HMAC_KEY
+    ).toString(CryptoJS.enc.Hex);
+
+    console.log(`[${req.url}]`, appConfig.HMAC_KEY, digest, signature);
+    if (digest !== signature) {
       return res
         .status(HttpStatusCode.Unauthorized)
-        .send(
+        .json(
           new utils.ErrorHandler(
-            "authHMACMiddleware.HMACValidattionTampered",
+            "authHMACMiddleware.HMACValidationTampered",
             "HMAC has been tampered"
           ).json()
         );
     }
-    if (req.get("uid") === undefined) {
-      log.Error(
-        "[HMAC] User id is not provided. In this case user context will be set empty!"
+
+    if (!req.get("uid")) {
+      console.warn(
+        "[HMAC] User ID is not provided. In this case user context will be set empty!"
       );
       res.locals.user = {};
       return next();
     }
 
-    const userUUID = req.header["uid"];
+    const userUUID = req.get("uid");
     let createdDate = Math.floor(Date.now() / 1000);
-    if (req.body.createdDate != "") {
-      createdDate = parseInt(req.body.createdDate, 64);
+    if (req.body.createdDate) {
+      createdDate = parseInt(req.body.createdDate, 10);
     }
 
     res.locals.user = {
+      uid: userUUID,
       userId: userUUID,
-      username: req.header["email"],
-      socialName: req.header["socialName"],
-      displayName: req.header["displayName"],
-      avatar: req.header["avatar"],
-      banner: req.header["banner"],
-      tagLine: req.header["tagLine"],
-      createdDate: createdDate,
-      systemRole: req.header["role"],
+      username: req.get("email"),
+      socialName: req.get("socialName"),
+      displayName: req.get("displayName"),
+      avatar: req.get("avatar"),
+      banner: req.get("banner"),
+      tagLine: req.get("tagLine"),
+      createdDate,
+      systemRole: req.get("role"),
     };
+
     next();
   } catch (error) {
-    log.Error(`HMAC validation ${error}`);
-    // Authentication failed
+    console.error(`HMAC validation ${error}`);
     return res
       .status(HttpStatusCode.Unauthorized)
-      .send(
+      .json(
         new utils.ErrorHandler(
           "authHMACMiddleware.AuthenticationFailed",
           "Authentication failed"

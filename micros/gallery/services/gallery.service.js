@@ -35,7 +35,6 @@ exports.saveManyMedia = async function (media) {
       }
       interfaceSlices.push(d);
     }
-
     await Gallery.insertMany(interfaceSlices);
   } catch (uuidErr) {
     throw uuidErr;
